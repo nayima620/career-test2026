@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>赛博天赋·人生剧本</title>
+    <title>测测你的隐藏打工魂</title>
     <style>
         :root {
             --bg-color: #0f0c1b;
             --card-bg: #1a1528;
-            --primary-color: #9d65ff;
+            --primary-color: #ff6b9d;
             --text-color: #e0d9f0;
             --text-sub: #8a7e9f;
-            --gradient: linear-gradient(135deg, #9d65ff 0%, #6236ff 100%);
+            --gradient: linear-gradient(135deg, #ff6b9d 0%, #9d65ff 100%);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; min-height: 100vh; }
@@ -20,7 +20,7 @@
         #home-page { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; text-align: center; }
         .title { font-size: 32px; font-weight: bold; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
         .subtitle { color: var(--text-sub); margin-bottom: 40px; font-size: 14px; }
-        .btn { background: var(--gradient); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(157, 101, 255, 0.4); transition: transform 0.2s; width: 80%; }
+        .btn { background: var(--gradient); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 107, 157, 0.4); transition: transform 0.2s; width: 80%; }
         .btn:active { transform: scale(0.95); }
 
         #quiz-page { display: none; flex-direction: column; flex: 1; }
@@ -41,21 +41,21 @@
         .score-num { font-size: 32px; font-weight: bold; color: var(--primary-color); }
         .score-label { font-size: 12px; color: var(--text-sub); }
         canvas { width: 100%; height: 260px; display: block; }
-        .job-item { margin-bottom: 15px; border-bottom: 1px solid #2a233b; padding-bottom: 15px; }
-        .job-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .job-name-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
-        .job-name { font-size: 18px; font-weight: bold; color: #fff; }
-        .job-match { font-size: 18px; font-weight: bold; color: var(--primary-color); }
-        .job-desc { font-size: 13px; color: var(--text-sub); line-height: 1.4; }
-        .job-advice { font-size: 12px; background: rgba(157, 101, 255, 0.1); color: #b898ff; padding: 8px 12px; border-radius: 8px; margin-top: 10px; display: inline-block; }
+        .tag-item { margin-bottom: 15px; border-bottom: 1px solid #2a233b; padding-bottom: 15px; }
+        .tag-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .tag-name-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .tag-name { font-size: 18px; font-weight: bold; color: #fff; }
+        .tag-match { font-size: 18px; font-weight: bold; color: var(--primary-color); }
+        .tag-desc { font-size: 13px; color: var(--text-sub); line-height: 1.4; }
+        .tag-advice { font-size: 12px; background: rgba(255, 107, 157, 0.1); color: #ff9fba; padding: 8px 12px; border-radius: 8px; margin-top: 10px; display: inline-block; }
     </style>
 </head>
 <body>
     <div class="app-container">
         <div id="home-page">
-            <h1 class="title">赛博天赋·人生剧本</h1>
-            <p class="subtitle">测测你的天命职业：你体内藏着哪种打工魂？</p>
-            <button class="btn" onclick="startQuiz()">开始探索天赋</button>
+            <h1 class="title">隐藏打工魂剧本</h1>
+            <p class="subtitle">测测你的真实精神状态与人设</p>
+            <button class="btn" onclick="startQuiz()">开始探索</button>
         </div>
         <div id="quiz-page">
             <div class="progress-bar"><div class="progress" id="progress"></div></div>
@@ -71,19 +71,19 @@
                 <div class="score-box">
                     <div>
                         <div class="score-num" id="res-total">0</div>
-                        <div class="score-label">总分 / 100</div>
+                        <div class="score-label">精神稳定值</div>
                     </div>
                     <div>
                         <div class="score-num" id="res-strength">0%</div>
-                        <div class="score-label">综合强度</div>
+                        <div class="score-label">社会化程度</div>
                     </div>
                 </div>
-                <div class="card-title">天赋雷达图</div>
+                <div class="card-title">精神维度雷达图</div>
                 <canvas id="radarChart" width="300" height="260"></canvas>
             </div>
             <div class="card">
-                <div class="card-title">推荐职业方向 TOP 4</div>
-                <div id="jobs-container"></div>
+                <div class="card-title">你的专属人设标签 TOP 4</div>
+                <div id="tags-container"></div>
             </div>
             <button class="btn" style="margin: 20px auto;" onclick="location.reload()">重新测试</button>
         </div>
@@ -91,48 +91,53 @@
 
     <script>
         const questions = [
-            { q: "周末去玩密室逃脱，你总是那个最快发现机关底层逻辑的人？", opts: [{t:"当然，简直是小菜一碟", d:"logic"}, {t:"我更在乎场景好不好看", d:"aesthetic"}, {t:"我会关注队友的情绪", d:"empathy"}, {t:"我更喜欢暴力破解", d:"chaos"}] },
-            { q: "看到极具设计感的网页或海报，你会忍不住截图保存？", opts: [{t:"经常的事，对美感有执念", d:"aesthetic"}, {t:"会研究它的代码怎么写的", d:"logic"}, {t:"会想象做这个图的人是谁", d:"introspective"}, {t:"只要能用就行，无所谓", d:"order"}] },
-            { q: "朋友emo找你倾诉，你通常能敏锐察觉到他没说出口的委屈？", opts: [{t:"能，我是天生的倾听者", d:"empathy"}, {t:"我会帮他理性分析问题", d:"logic"}, {t:"我会带他去吃顿好的", d:"extreme"}, {t:"我会给他讲大道理", d:"language"}] },
-            { q: "遇到复杂的说明书，你宁愿自己摸索也不愿去问人？", opts: [{t:"是的，我喜欢钻研", d:"introspective"}, {t:"我会直接找客服", d:"language"}, {t:"我动手能力强，直接拆", d:"spatial"}, {t:"我会按部就班看说明书", d:"order"}] },
-            { q: "在一场头脑风暴中，你更喜欢提出天马行空的点子？", opts: [{t:"对，我脑洞很大", d:"chaos"}, {t:"我更喜欢做最终总结", d:"order"}, {t:"我负责活跃气氛", d:"language"}, {t:"我会考虑点子能不能落地", d:"extreme"}] },
-            { q: "你非常擅长给物品分类整理，Excel表格必须整整齐齐？", opts: [{t:"不整齐我会很难受", d:"order"}, {t:"能用就行，不乱就行", d:"nature"}, {t:"我只看数据和逻辑", d:"logic"}, {t:"我更喜欢画图展示", d:"aesthetic"}] },
-            { q: "玩拼图或乐高时，你不需要看图纸就能在脑海中搭出大概形状？", opts: [{t:"是的，空间感极强", d:"spatial"}, {t:"我还是得看图纸", d:"order"}, {t:"我会自己发明新拼法", d:"chaos"}, {t:"这太费脑子了不想玩", d:"nature"}] },
-            { q: "逛街时，你能轻易说出别人穿搭哪里不协调？", opts: [{t:"一眼就能看出来", d:"aesthetic"}, {t:"我不太关注别人穿什么", d:"introspective"}, {t:"我会直接上去建议", d:"language"}, {t:"我会觉得这样也挺有个性", d:"empathy"}] },
-            { q: "你经常在脑海中推演各种“如果当初……”的平行宇宙剧情？", opts: [{t:"经常，脑内小剧场丰富", d:"introspective"}, {t:"我会根据数据推演未来", d:"logic"}, {t:"我会把它写成小说", d:"language"}, {t:"我不怎么回忆过去", d:"order"}] },
-            { q: "相比于和一群人狂欢，你更喜欢一个人看纪录片或写日记？", opts: [{t:"独处能让我充电", d:"introspective"}, {t:"我喜欢大家一起热闹", d:"empathy"}, {t:"我喜欢在大自然中独处", d:"nature"}, {t:"我看纪录片是为了学知识", d:"logic"}] },
-            { q: "别人吵架时，你能快速抓住双方逻辑漏洞并指出？", opts: [{t:"能，我思维很敏捷", d:"logic"}, {t:"我会先安抚双方情绪", d:"empathy"}, {t:"我会用幽默化解尴尬", d:"language"}, {t:"我会看热闹不嫌事大", d:"chaos"}] },
-            { q: "走在路上，你经常能注意到路边新长出的植物或流浪猫？", opts: [{t:"对，我对生命很敏感", d:"nature"}, {t:"我会拍照发朋友圈", d:"aesthetic"}, {t:"我经常沉浸在自己的世界", d:"introspective"}, {t:"我会想把它带回家养", d:"empathy"}] },
-            { q: "如果让你去安排一场10人旅行，你会把行程表精确到分钟？", opts: [{t:"必须的，强迫症晚期", d:"order"}, {t:"我会留出自由活动时间", d:"nature"}, {t:"我会把预算算得很清楚", d:"logic"}, {t:"随便吧，走到哪算哪", d:"chaos"}] },
-            { q: "你很容易被他人的痛苦感染，甚至看新闻都会流泪？", opts: [{t:"是的，共情能力太强", d:"empathy"}, {t:"我会想怎么解决这个问题", d:"logic"}, {t:"我会写文章呼吁", d:"language"}, {t:"我会去实地做志愿者", d:"extreme"}] },
-            { q: "你认为规矩就是用来打破的，按部就班太无聊了？", opts: [{t:"对，我讨厌被约束", d:"chaos"}, {t:"没有规矩不成方圆", d:"order"}, {t:"我只遵守合理的规矩", d:"logic"}, {t:"规矩能保护弱者", d:"empathy"}] },
-            { q: "你经常因为咬文嚼字，在群聊里被别人称为“杠精”？", opts: [{t:"我只是追求严谨", d:"logic"}, {t:"我擅长文字游戏", d:"language"}, {t:"我很少在群里说话", d:"introspective"}, {t:"我只对喜欢的话题杠", d:"extreme"}] },
-            { q: "朋友总评价你是个“非常靠谱、能把事交给你”的人？", opts: [{t:"是的，执行力超强", d:"order"}, {t:"我更像个创意提供者", d:"aesthetic"}, {t:"我更像个和事佬", d:"empathy"}, {t:"我更像个技术大牛", d:"spatial"}] },
-            { q: "你常常觉得，比起人类社会，你更喜欢大自然带来的治愈感？", opts: [{t:"大自然才是最包容的", d:"nature"}, {t:"我喜欢探索宇宙的奥秘", d:"spatial"}, {t:"我还是喜欢城市的繁华", d:"language"}, {t:"我喜欢研究动植物", d:"introspective"}] },
-            { q: "你极度讨厌半途而废，做事要么不做，要做就必须做到极致？", opts: [{t:"我有很强的执念", d:"extreme"}, {t:"我会权衡利弊再决定", d:"logic"}, {t:"我觉得完成比完美重要", d:"order"}, {t:"我很容易被新事物吸引", d:"chaos"}] },
-            { q: "看科幻电影时，你更关注宇宙飞船的构造而不是男女主的爱情？", opts: [{t:"对，我对机械结构着迷", d:"spatial"}, {t:"我会分析物理定律", d:"logic"}, {t:"我会关注特效美感", d:"aesthetic"}, {t:"我看电影就为了放松", d:"nature"}] },
-            { q: "让你当众演讲或者给客户推销产品，你完全不会怯场且极具感染力？", opts: [{t:"我是天生的演说家", d:"language"}, {t:"我会用同理心打动对方", d:"empathy"}, {t:"我会用数据说服对方", d:"logic"}, {t:"我会展现我的个人魅力", d:"aesthetic"}] },
-            { q: "你经常会幻想自己是一个虚拟世界的造物主，可以设计一切规则？", opts: [{t:"经常，我喜欢上帝视角", d:"spatial"}, {t:"我会设计极其精密的系统", d:"order"}, {t:"我会创造各种奇怪生物", d:"chaos"}, {t:"我会让世界充满爱", d:"empathy"}] },
-            { q: "你拥有非常强烈的个人色彩，讨厌盲从潮流，甚至有点“艺术家的怪脾气”？", opts: [{t:"我就是我，不一样的烟火", d:"aesthetic"}, {t:"我比较特立独行", d:"introspective"}, {t:"我喜欢挑战权威", d:"extreme"}, {t:"我喜欢顺应自然", d:"nature"}] },
-            { q: "如果有一项工作能让你远离人群，只专注钻研某样东西，你会非常开心？", opts: [{t:"太棒了，我社恐", d:"introspective"}, {t:"我更希望是研究大自然", d:"nature"}, {t:"我会专注写代码", d:"logic"}, {t:"我会沉迷于艺术创作", d:"aesthetic"}] }
+            { q: "早晨闹钟响的那一刻，你脑海中最真实的念头是？", opts: [{t:"立刻在脑子里规划出今天要做的最重要的三件事", d:"order"}, {t:"幻想自己是个不用上班的野人，在森林里自由奔跑", d:"nature"}, {t:"已经想好怎么跟老板请病假的话术了", d:"language"}, {t:"每天都在怀疑自己为什么要在这个破地方受苦", d:"introspective"}] },
+            { q: "在公司/学校的电梯里遇到半熟不熟的同事，你的反应是？", opts: [{t:"只要我不尴尬，尴尬的就是别人，微笑点头", d:"order"}, {t:"疯狂在大脑里检索对方的名字，怕叫错", d:"introspective"}, {t:"主动找话题：“哎你今天衣服真好看！”", d:"empathy"}, {t:"假装低头看手机，祈祷电梯快点到", d:"nature"}] },
+            { q: "刷手机时，哪种内容最容易让你停下手指？", opts: [{t:"极简风/高级感的穿搭或家居布置", d:"aesthetic"}, {t:"揭露某种行业潜规则或者硬核干货数据贴", d:"logic"}, {t:"搞笑段子、发疯文学或者奇葩人类大赏", d:"chaos"}, {t:"流浪动物救助、唯美的风景旅拍", d:"nature"}] },
+            { q: "团队讨论方案时，你最受不了哪种人？", opts: [{t:"毫无逻辑，全靠感觉乱说的人", d:"logic"}, {t:"只会挑刺，自己又拿不出好方案的人", d:"extreme"}, {t:"磨磨唧唧，迟迟不拍板的人", d:"order"}, {t:"完全不顾及别人感受，说话很难听的人", d:"empathy"}] },
+            { q: "如果你现在拥有了一项可以改变世界的能力，你希望是？", opts: [{t:"瞬间建好一栋充满未来科技感的大楼", d:"spatial"}, {t:"让所有人的负面情绪立刻消失", d:"empathy"}, {t:"能听懂所有动植物在说什么", d:"nature"}, {t:"让所有人都能心平气和地听我讲道理", d:"language"}] },
+            { q: "朋友发来一条 60 秒的语音方阵，你会？", opts: [{t:"直接转文字，快速扫一眼核心信息", d:"logic"}, {t:"戴上耳机耐心听完，感受TA的语气", d:"empathy"}, {t:"不想听，直接回个表情包糊弄过去", d:"chaos"}, {t:"找个安静的地方，边听边在脑子里构思怎么回复", d:"introspective"}] },
+            { q: "给你一个完全不用考虑赚钱的 Gap Year，你最想去干嘛？", opts: [{t:"去深山老林里租个小院子，种花养狗", d:"nature"}, {t:"报个班学画画、陶艺或者做个独立游戏", d:"aesthetic"}, {t:"环游世界，去体验各种极限运动", d:"chaos"}, {t:"闷在家里疯狂看书，研究哲学、心理学", d:"introspective"}] },
+            { q: "面对一项极其枯燥但必须完成的 Excel 表格任务，你会？", opts: [{t:"弄个公式一键搞定，哪怕研究公式要花半小时", d:"logic"}, {t:"戴上耳机，放点激情的BGM，硬着头皮猛干", d:"extreme"}, {t:"弄个好看的配色和排版，让它看起来顺眼点", d:"aesthetic"}, {t:"边填边骂，摸鱼十分钟填表一分钟", d:"chaos"}] },
+            { q: "别人夸你“聪明”和“靠谱”，你更希望是哪个？", opts: [{t:"聪明。说明我脑子转得快，有创造力", d:"aesthetic"}, {t:"靠谱。说明我执行力强，细节控", d:"order"}, {t:"聪明。说明我逻辑严密，一眼看透本质", d:"logic"}, {t:"靠谱。说明我能给人安全感", d:"empathy"}] },
+            { q: "你最喜欢在朋友圈发什么？", opts: [{t:"自己拍的高级感大片或看展日常", d:"aesthetic"}, {t:"深夜网抑云，或者一些关于人生的碎碎念", d:"introspective"}, {t:"吐槽工作/生活中的奇葩遭遇，自带段子属性", d:"language"}, {t:"风景照、小动物、花花草草", d:"nature"}] },
+            { q: "在一场剧本杀里，你最想抽到的角色是？", opts: [{t:"逻辑严密的推土机，靠线索锁死凶手", d:"logic"}, {t:"疯狂带节奏、能把黑说成白的搅屎棍", d:"language"}, {t:"掌握核心机关或者建筑图纸的技术流", d:"spatial"}, {t:"情感线极重，全场哭得最惨的C位", d:"empathy"}] },
+            { q: "如果你要自己组装一个宜家衣柜，你会？", opts: [{t:"严格按照图纸，一步步来，螺丝一个不能多", d:"order"}, {t:"先把所有板子摊开，在脑子里建个模再动手", d:"spatial"}, {t:"随便拼，能立起来就行，外观不重要", d:"chaos"}, {t:"一边拼一边吐槽这反人类的设计", d:"extreme"}] },
+            { q: "如果突然被拉到台上发言，你的第一反应是？", opts: [{t:"心跳加速，但能迅速整理好思路开始输出", d:"language"}, {t:"脑子一片空白，希望有人赶紧来救场", d:"introspective"}, {t:"随便讲个笑话，先把大家逗乐再说", d:"chaos"}, {t:"还好我平时看的东西多，可以引经据典", d:"logic"}] },
+            { q: "周末你更倾向于哪种充电方式？", opts: [{t:"一个人宅着，谁也别理我", d:"introspective"}, {t:"去人声鼎沸的商场或者Livehouse感受人气", d:"language"}, {t:"去公园躺草坪或者去爬山", d:"nature"}, {t:"去玩密室逃脱或者看一场烧脑电影", d:"spatial"}] },
+            { q: "如果世界是个巨大的草台班子，你觉得你在这个班子里是？", opts: [{t:"那个负责修音响、搭台子的技术工", d:"spatial"}, {t:"那个在台下疯狂吐槽的观众", d:"language"}, {t:"那个试图把班子重新整顿好的导演", d:"order"}, {t:"那个在后台默默种花的NPC", d:"nature"}] },
+            { q: "以下哪个词最能让你破防？", opts: [{t:"“你连这都不懂？”", d:"logic"}, {t:"“你这人真没意思。”", d:"chaos"}, {t:"“你的方案毫无美感。”", d:"aesthetic"}, {t:"“你怎么这么自私？”", d:"empathy"}] },
+            { q: "看到不公的事情，你体内哪种血液最沸腾？", opts: [{t:"想要立刻长篇大论去反击", d:"language"}, {t:"想把背后的社会结构问题扒出来", d:"logic"}, {t:"同情受害者，想给他们提供帮助", d:"empathy"}, {t:"气到想毁灭世界，直接掀桌子", d:"extreme"}] },
+            { q: "在挑选家具时，你最看重的是？", opts: [{t:"颜色和颜值必须过关", d:"aesthetic"}, {t:"尺寸必须严丝合缝，动线要合理", d:"spatial"}, {t:"收纳功能强不强，好不好清洁", d:"order"}, {t:"最好是用原木、环保材料", d:"nature"}] },
+            { q: "别人说你“想太多”，通常是因为你在干什么？", opts: [{t:"思考宇宙的尽头和人生的意义", d:"introspective"}, {t:"因为一个细节，推演出一整部连续剧", d:"logic"}, {t:"总是害怕自己刚才说的话伤害到别人", d:"empathy"}, {t:"觉得大家都太俗了，没人懂我的艺术", d:"aesthetic"}] },
+            { q: "发现了一个极其小众的宝藏兴趣，你会？", opts: [{t:"自己偷偷玩，不想让任何人发现", d:"introspective"}, {t:"立刻发朋友圈，安利给所有人", d:"language"}, {t:"深入钻研，研究它的起源和底层逻辑", d:"logic"}, {t:"觉得它太美了，想把它发扬光大", d:"aesthetic"}] },
+            { q: "如果你要写一本小说，你会写什么题材？", opts: [{t:"极其严密的科幻悬疑推理", d:"logic"}, {t:"探讨人性幽暗深处的意识流文学", d:"introspective"}, {t:"沙雕搞笑、各种反转的无厘头爽文", d:"chaos"}, {t:"治愈人心的自然田园日常", d:"nature"}] },
+            { q: "走在街上，你更容易被什么吸引视线？", opts: [{t:"极具设计感的橱窗陈列", d:"aesthetic"}, {t:"街边突然跑过去的小猫小狗", d:"nature"}, {t:"两个人在角落里激烈争吵", d:"empathy"}, {t:"建筑外墙上奇怪的钢筋结构", d:"spatial"}] },
+            { q: "面对一个总是甩锅的同事，你会怎么处理？", opts: [{t:"收集证据，用邮件和数据把锅甩回去", d:"logic"}, {t:"直接当场跟他开撕，把他怼到哑口无言", d:"extreme"}, {t:"先和周围人搞好关系，让他被孤立", d:"language"}, {t:"忍气吞声，回去内耗一整晚", d:"introspective"}] },
+            { q: "如果有一天你暴富了，你最想买的终极奢侈品是？", opts: [{t:"一个拥有顶级安保和设计的私人岛屿别墅", d:"spatial"}, {t:"包下一座山头，建一个流浪动物救助基地", d:"nature"}, {t:"举办一场由我亲自设计的全球顶级艺术节", d:"aesthetic"}, {t:"什么都不买，直接躺平，雇人替我打工", d:"chaos"}] }
         ];
-        const dims = { logic: "逻辑解构", aesthetic: "审美感知", empathy: "人际共情", language: "语言表达", spatial: "空间构筑", order: "秩序执行", introspective: "内省探索", nature: "自然观察", chaos: "混沌脑洞", extreme: "极端偏执" };
-        const jobDB = {
-            logic: [{n:"算法工程师", d:"构建改变世界的代码逻辑"},{n:"数据分析师", d:"在海量数据中洞察商业机密"},{n:"金融精算师", d:"用数学计算出未来的风险"},{n:"网络安全专家", d:"数字世界的守门人"},{n:"刑侦检验员", d:"让证据开口说话"}],
-            aesthetic: [{n:"视觉设计师", d:"创作有视觉冲击力的作品"},{n:"插画师", d:"用画笔描绘奇妙世界"},{n:"时尚买手", d:"引领潮流的审美先锋"},{n:"影视导演", d:"用镜头讲述动人故事"},{n:"独立策展人", d:"艺术的传播者与组织者"}],
-            empathy: [{n:"心理咨询师", d:"抚慰人心的灵魂导师"},{n:"HRBP", d:"企业与员工之间的桥梁"},{n:"特教教师", d:"点亮星星的孩子的引路人"},{n:"大客户销售", d:"用真诚和专业打动客户"},{n:"康复理疗师", d:"用双手带来身心的治愈"}],
-            language: [{n:"广告文案", d:"一字千金，直击人心"},{n:"公关总监", d:"化解危机，塑造品牌形象"},{n:"涉外律师", d:"用语言捍卫公平正义"},{n:"同声传译", d:"跨越语言障碍的文化使者"},{n:"脱口秀编剧", d:"把生活写成段子的人"}],
-            spatial: [{n:"建筑设计师", d:"构建人类居住的物理空间"},{n:"游戏3D场景美术", d:"创造沉浸式的虚拟世界"},{n:"室内设计师", d:"让空间充满温度和美感"},{n:"无人机飞手", d:"以上帝视角俯瞰世界"},{n:"城市规划师", d:"描绘城市未来的宏伟蓝图"}],
-            order: [{n:"项目管理PM", d:"运筹帷幄，确保目标达成"},{n:"财务审计", d:"企业健康的守护者"},{n:"供应链统筹", d:"让万物高效流转"},{n:"行政总监", d:"大管家的终极形态"},{n:"活动运营策划", d:"把每一个细节做到极致"}],
-            introspective: [{n:"独立撰稿人", d:"与灵魂对话的文字工作者"},{n:"心理学家", d:"探索人类内心深处的奥秘"},{n:"图书馆馆长", d:"知识的守护者与传播者"},{n:"哲学研究员", d:"思考宇宙与人生的终极问题"},{n:"手帐设计师", d:"记录生活的美好仪式感"}],
-            nature: [{n:"宠物医生", d:"毛孩子生命的守护神"},{n:"生态研究员", d:"保护地球的生物多样性"},{n:"园艺设计师", d:"用植物装点生活"},{n:"地质勘探员", d:"探寻地球深处的秘密"},{n:"户外营地导师", d:"带领人们回归自然怀抱"}],
-            chaos: [{n:"元宇宙架构师", d:"在虚拟世界创造一切可能"},{n:"NFT数字艺术家", d:"颠覆传统艺术认知的先锋"}],
-            extreme: [{n:"极限运动摄影师", d:"在生死边缘捕捉极致的美"},{n:"前卫艺术家", d:"不疯魔不成活"}]
+
+        const dims = { logic: "理性脑", aesthetic: "审美感", empathy: "共情力", language: "社交嘴替", spatial: "空间构建", order: "秩序感", introspective: "精神内耗", nature: "自然松弛", chaos: "混沌发疯", extreme: "极端偏执" };
+        
+        const tagDB = {
+            logic: [{n:"人间清醒大明白", d:"智商在线，看破不说破的理中客"},{n:"硬核数据狂魔", d:"用事实说话，拒绝废话"},{n:"逻辑闭环大师", d:"你的大脑像个精密的计算机"},{n:"理性吃瓜第一人", d:"绝不站队，只看证据"}],
+            aesthetic: [{n:"颜值即正义", d:"审美极佳，看脸看穿搭"},{n:"朋友圈视觉总监", d:"你的图不精修绝不发"},{n:"生活美学博主", d:"你买的不仅是东西，是氛围感"},{n:"赛博外貌协会会员", d:"颜值是一切故事的敲门砖"}],
+            empathy: [{n:"情绪树洞担当", d:"朋友的最佳倾诉对象"},{n:"中央空调小暖炉", d:"共情能力太强，看新闻都会哭"},{n:"人类和平大使", d:"吵架时最温柔的和事佬"},{n:"重度护崽狂魔", d:"对在乎的人极度护短"}],
+            language: [{n:"社交悍匪/社牛", d:"只要你不尴尬，尴尬的就是别人"},{n:"互联网顶级嘴替", d:"你的表达总能精准戳中人心"},{n:"逻辑带师辩论手", d:"没人能在你的BGM里吵赢你"},{n:"高情商沟通专家", d:"向上管理、向下兼容的社交王者"}],
+            spatial: [{n:"二次元造梦师", d:"脑内自带3D建模引擎"},{n:"路痴界的绝缘体", d:"天塌下来你也能看懂地图"},{n:"解谜游戏收割机", d:"空间拼图大师"},{n:"建筑美学猎人", d:"总是能从结构中发现美"}],
+            order: [{n:"究极J人强迫症", d:"所有的东西必须待在该待的地方"},{n:"日程表狂魔", d:"P人地狱，你是时间管理大师"},{n:"搞钱/搞事第一线", d:"执行力超强，想什么立刻做"},{n:"靠谱成年人", d:"只要有你在，项目就不会崩"}],
+            introspective: [{n:"重度精神内耗患者", d:"白天哈哈哈，深夜网抑云"},{n:"孤独的哲学家", d:"享受独处，脑内小剧场极其丰富"},{n:"高敏感星人", d:"对世界万物有着细腻的感知"},{n:"佛系修仙选手", d:"比起社交，更想一个人发呆"}],
+            nature: [{n:"极品松弛感人类", d:"万事不急，顺其自然"},{n:"花草猫狗交流官", d:"看到流浪动物就走不动道"},{n:"反内卷先锋", d:"只要我躺得够平，资本就剥削不到我"},{n:"大自然野生代颜人", d:"比起城市的喧嚣，更爱山野的风"}],
+            chaos: [{n:"发疯文学十级学者", d:"精神状态领先正常人十年"},{n:"脑洞黑洞制造机", d:"思维极其跳脱，没人跟得上你"},{n:"搞笑女/男实锤", d:"你是朋友圈的快乐瀑布"},{n:"薛定谔的社恐", d:"遇到熟人社牛，遇到生人社恐"}],
+            extreme: [{n:"纯爱/纯恨战神", d:"要么爱到底，要么滚远点"},{n:"偏执型完美主义", d:"要么不做，要做就做到极致"},{n:"暴脾气小辣椒", d:"拒绝内耗，有气当场就撒"},{n:"不疯魔不成活", d:"执着于自己认定的真理"}]
         };
+
         let currentQ = 0;
         let scores = { logic:0, aesthetic:0, empathy:0, language:0, spatial:0, order:0, introspective:0, nature:0, chaos:0, extreme:0 };
         let hiddenFlags = { q15: false, q19: false, q23: false };
+
         function startQuiz() { document.getElementById('home-page').style.display = 'none'; document.getElementById('quiz-page').style.display = 'flex'; renderQuestion(); }
+        
         function renderQuestion() {
             if (currentQ >= questions.length) { showResult(); return; }
             const qData = questions[currentQ];
@@ -146,6 +151,7 @@
                 optsContainer.appendChild(btn);
             });
         }
+
         function selectOption(dim) {
             if (currentQ === 14 && dim === 'chaos') hiddenFlags.q15 = true;
             if (currentQ === 18 && dim === 'extreme') hiddenFlags.q19 = true;
@@ -156,30 +162,42 @@
             quizPage.style.opacity = '0';
             setTimeout(() => { renderQuestion(); quizPage.style.opacity = '1'; }, 150);
         }
+
         function showResult() {
             document.getElementById('quiz-page').style.display = 'none';
             document.getElementById('result-page').style.display = 'flex';
             let isEasterEgg = false; let typeName = ""; let typeDesc = "";
-            if (hiddenFlags.q15 && hiddenFlags.q19 && hiddenFlags.q23) { isEasterEgg = true; typeName = "🤡 赛博疯子"; typeDesc = "常规职场容不下你，你的归宿是元宇宙！"; }
-            else if (scores.introspective >= 3 && scores.nature >= 3) { isEasterEgg = true; typeName = "🌿 隐世高人"; typeDesc = "世俗的KPI对你来说只是浮云，你的灵魂在大自然。"; }
+            
+            if (hiddenFlags.q15 && hiddenFlags.q19 && hiddenFlags.q23) { 
+                isEasterEgg = true; typeName = "🤡 纯正发疯文学大师"; typeDesc = "你的精神状态遥遥领先，正常人类已经无法理解你的脑回路了！"; 
+            }
+            else if (scores.introspective >= 3 && scores.nature >= 3) { 
+                isEasterEgg = true; typeName = "🌿 绝版隐世修仙党"; typeDesc = "世俗的欲望与你无关，你只想在深山老林里发呆。"; 
+            }
             else {
                 const sortedDims = Object.keys(scores).filter(k => !['chaos', 'extreme'].includes(k)).sort((a,b) => scores[b] - scores[a]);
                 const top1 = sortedDims[0];
-                typeName = top1 === 'aesthetic' ? "艺术创作型" : top1 === 'logic' ? "理性推演型" : top1 === 'empathy' ? "灵魂治愈型" : top1 === 'language' ? "传播表达型" : top1 === 'spatial' ? "空间构筑型" : top1 === 'order' ? "秩序掌控型" : top1 === 'introspective' ? "内省哲思型" : "自然亲和型";
-                typeDesc = "你擅长" + dims[top1] + "，这是你独一无二的天赋。";
+                typeName = top1 === 'aesthetic' ? "人间富贵花/颜控型" : top1 === 'logic' ? "人间清醒理智型" : top1 === 'empathy' ? "暖心情绪价值型" : top1 === 'language' ? "社交悍匪/嘴替型" : top1 === 'spatial' ? "二次元造梦型" : top1 === 'order' ? "靠谱J人掌控型" : top1 === 'introspective' ? "高敏内耗哲学家" : "极品松弛感选手";
+                typeDesc = "你的核心特质是【" + dims[top1] + "】，这决定了你的社交人设。";
             }
+            
             document.getElementById('res-type').innerText = typeName;
             document.getElementById('res-subtitle').innerText = typeDesc;
+            
             let totalScore = 0; let radarData = [];
             const coreDims = ['logic', 'spatial', 'aesthetic', 'language', 'empathy', 'introspective', 'nature', 'order'];
             coreDims.forEach(k => { totalScore += scores[k]; radarData.push({ label: dims[k], val: scores[k] }); });
-            let displayTotal = Math.min(Math.round((totalScore / 12) * 100), 100); 
-            if(displayTotal < 30) displayTotal = 30;
+            
+            let displayTotal = 100 - Math.min(Math.round((scores.introspective + scores.chaos + scores.extreme) * 8), 80); 
+            if(displayTotal < 20) displayTotal = 20; 
+            
             document.getElementById('res-total').innerText = displayTotal;
-            document.getElementById('res-strength').innerText = Math.min(displayTotal + 5, 99) + "%";
+            document.getElementById('res-strength').innerText = Math.min(Math.round((totalScore/12)*100), 99) + "%";
+            
             drawRadar(radarData);
-            renderJobs(isEasterEgg);
+            renderTags(isEasterEgg);
         }
+
         function drawRadar(data) {
             const canvas = document.getElementById('radarChart'); const ctx = canvas.getContext('2d');
             const w = canvas.width; const h = canvas.height; const cx = w / 2; const cy = h / 2; const r = 90; const angle = (Math.PI * 2) / data.length;
@@ -206,24 +224,28 @@
                 const x = Math.cos(angle * i - Math.PI/2) * (r * val / 5); const y = Math.sin(angle * i - Math.PI/2) * (r * val / 5);
                 if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             }
-            ctx.closePath(); ctx.fillStyle = 'rgba(157, 101, 255, 0.4)'; ctx.fill(); ctx.strokeStyle = '#9d65ff'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.closePath(); ctx.fillStyle = 'rgba(255, 107, 157, 0.4)'; ctx.fill(); ctx.strokeStyle = '#ff6b9d'; ctx.lineWidth = 2; ctx.stroke();
             ctx.setTransform(1, 0, 0, 1, 0, 0);
         }
-        function renderJobs(isEasterEgg) {
-            const container = document.getElementById('jobs-container'); container.innerHTML = '';
+
+        function renderTags(isEasterEgg) {
+            const container = document.getElementById('tags-container'); container.innerHTML = '';
             const sortedDims = Object.keys(scores).filter(k => !['chaos', 'extreme'].includes(k)).sort((a,b) => scores[b] - scores[a]);
-            let selectedJobs = [];
-            if (isEasterEgg) { selectedJobs = [...jobDB.chaos, ...jobDB.extreme]; } 
-            else {
+            let selectedTags = [];
+            
+            if (isEasterEgg) { 
+                selectedTags = [...tagDB.chaos, ...tagDB.extreme]; 
+            } else {
                 const top1 = sortedDims[0]; const top2 = sortedDims[1];
-                selectedJobs = [...jobDB[top1]];
-                if (selectedJobs.length < 4) { selectedJobs = selectedJobs.concat(jobDB[top2]); }
-                selectedJobs = selectedJobs.slice(0, 4);
+                selectedTags = [...tagDB[top1]];
+                if (selectedTags.length < 4) { selectedTags = selectedTags.concat(tagDB[top2]); }
+                selectedTags = selectedTags.slice(0, 4);
             }
-            let matchScores = [97, 93, 89, 85];
-            selectedJobs.forEach((job, index) => {
-                const div = document.createElement('div'); div.className = 'job-item';
-                div.innerHTML = `<div class="job-name-row"><div class="job-name">${job.n}</div><div class="job-match">${matchScores[index]}%</div></div><div class="job-desc">${job.d}</div><div class="job-advice">成长建议：发挥你的天赋，持续深耕该领域的专业技能。</div>`;
+            
+            let matchScores = [98, 95, 89, 85];
+            selectedTags.forEach((tag, index) => {
+                const div = document.createElement('div'); div.className = 'tag-item';
+                div.innerHTML = `<div class="tag-name-row"><div class="tag-name">${tag.n}</div><div class="tag-match">${matchScores[index]}%</div></div><div class="tag-desc">${tag.d}</div><div class="tag-advice">测出该标签的你，是人群中非常独特的存在！</div>`;
                 container.appendChild(div);
             });
         }
