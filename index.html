@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>赛博天赋·人生剧本</title>
+    <style>
+        :root {
+            --bg-color: #0f0c1b;
+            --card-bg: #1a1528;
+            --primary-color: #9d65ff;
+            --text-color: #e0d9f0;
+            --text-sub: #8a7e9f;
+            --gradient: linear-gradient(135deg, #9d65ff 0%, #6236ff 100%);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; min-height: 100vh; }
+        .app-container { width: 100%; max-width: 480px; padding: 20px; display: flex; flex-direction: column; position: relative; }
+        
+        #home-page { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; text-align: center; }
+        .title { font-size: 32px; font-weight: bold; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+        .subtitle { color: var(--text-sub); margin-bottom: 40px; font-size: 14px; }
+        .btn { background: var(--gradient); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(157, 101, 255, 0.4); transition: transform 0.2s; width: 80%; }
+        .btn:active { transform: scale(0.95); }
+
+        #quiz-page { display: none; flex-direction: column; flex: 1; }
+        .progress-bar { width: 100%; height: 6px; background: #2a233b; border-radius: 3px; margin: 20px 0 40px; overflow: hidden; }
+        .progress { width: 0%; height: 100%; background: var(--gradient); transition: width 0.3s; }
+        .question-text { font-size: 20px; line-height: 1.5; margin-bottom: 30px; font-weight: 500; }
+        .options { display: flex; flex-direction: column; gap: 12px; }
+        .option { background: var(--card-bg); border: 1px solid #2a233b; padding: 16px 20px; border-radius: 15px; font-size: 15px; cursor: pointer; transition: all 0.2s; }
+        .option:active { border-color: var(--primary-color); background: #241b38; transform: translateX(5px); }
+
+        #result-page { display: none; flex-direction: column; flex: 1; padding-bottom: 40px; }
+        .result-header { text-align: center; margin-top: 20px; margin-bottom: 30px; }
+        .result-title { font-size: 28px; font-weight: bold; color: #00e5ff; text-shadow: 0 0 10px rgba(0, 229, 255, 0.5); margin-bottom: 10px; }
+        .result-desc { font-size: 14px; color: var(--text-sub); }
+        .card { background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #2a233b; }
+        .card-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; }
+        .score-box { display: flex; justify-content: space-around; text-align: center; margin-bottom: 20px; }
+        .score-num { font-size: 32px; font-weight: bold; color: var(--primary-color); }
+        .score-label { font-size: 12px; color: var(--text-sub); }
+        canvas { width: 100%; height: 260px; display: block; }
+        .job-item { margin-bottom: 15px; border-bottom: 1px solid #2a233b; padding-bottom: 15px; }
+        .job-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .job-name-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .job-name { font-size: 18px; font-weight: bold; color: #fff; }
+        .job-match { font-size: 18px; font-weight: bold; color: var(--primary-color); }
+        .job-desc { font-size: 13px; color: var(--text-sub); line-height: 1.4; }
+        .job-advice { font-size: 12px; background: rgba(157, 101, 255, 0.1); color: #b898ff; padding: 8px 12px; border-radius: 8px; margin-top: 10px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div id="home-page">
+            <h1 class="title">赛博天赋·人生剧本</h1>
+            <p class="subtitle">测测你的天命职业：你体内藏着哪种打工魂？</p>
+            <button class="btn" onclick="startQuiz()">开始探索天赋</button>
+        </div>
+        <div id="quiz-page">
+            <div class="progress-bar"><div class="progress" id="progress"></div></div>
+            <div class="question-text" id="question-text">题目加载中...</div>
+            <div class="options" id="options-container"></div>
+        </div>
+        <div id="result-page">
+            <div class="result-header">
+                <div class="result-title" id="res-type">加载中...</div>
+                <div class="result-desc" id="res-subtitle"></div>
+            </div>
+            <div class="card">
+                <div class="score-box">
+                    <div>
+                        <div class="score-num" id="res-total">0</div>
+                        <div class="score-label">总分 / 100</div>
+                    </div>
+                    <div>
+                        <div class="score-num" id="res-strength">0%</div>
+                        <div class="score-label">综合强度</div>
+                    </div>
+                </div>
+                <div class="card-title">天赋雷达图</div>
+                <canvas id="radarChart" width="300" height="260"></canvas>
+            </div>
+            <div class="card">
+                <div class="card-title">推荐职业方向 TOP 4</div>
+                <div id="jobs-container"></div>
+            </div>
+            <button class="btn" style="margin: 20px auto;" onclick="location.reload()">重新测试</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            { q: "周末去玩密室逃脱，你总是那个最快发现机关底层逻辑的人？", opts: [{t:"当然，简直是小菜一碟", d:"logic"}, {t:"我更在乎场景好不好看", d:"aesthetic"}, {t:"我会关注队友的情绪", d:"empathy"}, {t:"我更喜欢暴力破解", d:"chaos"}] },
+            { q: "看到极具设计感的网页或海报，你会忍不住截图保存？", opts: [{t:"经常的事，对美感有执念", d:"aesthetic"}, {t:"会研究它的代码怎么写的", d:"logic"}, {t:"会想象做这个图的人是谁", d:"introspective"}, {t:"只要能用就行，无所谓", d:"order"}] },
+            { q: "朋友emo找你倾诉，你通常能敏锐察觉到他没说出口的委屈？", opts: [{t:"能，我是天生的倾听者", d:"empathy"}, {t:"我会帮他理性分析问题", d:"logic"}, {t:"我会带他去吃顿好的", d:"extreme"}, {t:"我会给他讲大道理", d:"language"}] },
+            { q: "遇到复杂的说明书，你宁愿自己摸索也不愿去问人？", opts: [{t:"是的，我喜欢钻研", d:"introspective"}, {t:"我会直接找客服", d:"language"}, {t:"我动手能力强，直接拆", d:"spatial"}, {t:"我会按部就班看说明书", d:"order"}] },
+            { q: "在一场头脑风暴中，你更喜欢提出天马行空的点子？", opts: [{t:"对，我脑洞很大", d:"chaos"}, {t:"我更喜欢做最终总结", d:"order"}, {t:"我负责活跃气氛", d:"language"}, {t:"我会考虑点子能不能落地", d:"extreme"}] },
+            { q: "你非常擅长给物品分类整理，Excel表格必须整整齐齐？", opts: [{t:"不整齐我会很难受", d:"order"}, {t:"能用就行，不乱就行", d:"nature"}, {t:"我只看数据和逻辑", d:"logic"}, {t:"我更喜欢画图展示", d:"aesthetic"}] },
+            { q: "玩拼图或乐高时，你不需要看图纸就能在脑海中搭出大概形状？", opts: [{t:"是的，空间感极强", d:"spatial"}, {t:"我还是得看图纸", d:"order"}, {t:"我会自己发明新拼法", d:"chaos"}, {t:"这太费脑子了不想玩", d:"nature"}] },
+            { q: "逛街时，你能轻易说出别人穿搭哪里不协调？", opts: [{t:"一眼就能看出来", d:"aesthetic"}, {t:"我不太关注别人穿什么", d:"introspective"}, {t:"我会直接上去建议", d:"language"}, {t:"我会觉得这样也挺有个性", d:"empathy"}] },
+            { q: "你经常在脑海中推演各种“如果当初……”的平行宇宙剧情？", opts: [{t:"经常，脑内小剧场丰富", d:"introspective"}, {t:"我会根据数据推演未来", d:"logic"}, {t:"我会把它写成小说", d:"language"}, {t:"我不怎么回忆过去", d:"order"}] },
+            { q: "相比于和一群人狂欢，你更喜欢一个人看纪录片或写日记？", opts: [{t:"独处能让我充电", d:"introspective"}, {t:"我喜欢大家一起热闹", d:"empathy"}, {t:"我喜欢在大自然中独处", d:"nature"}, {t:"我看纪录片是为了学知识", d:"logic"}] },
+            { q: "别人吵架时，你能快速抓住双方逻辑漏洞并指出？", opts: [{t:"能，我思维很敏捷", d:"logic"}, {t:"我会先安抚双方情绪", d:"empathy"}, {t:"我会用幽默化解尴尬", d:"language"}, {t:"我会看热闹不嫌事大", d:"chaos"}] },
+            { q: "走在路上，你经常能注意到路边新长出的植物或流浪猫？", opts: [{t:"对，我对生命很敏感", d:"nature"}, {t:"我会拍照发朋友圈", d:"aesthetic"}, {t:"我经常沉浸在自己的世界", d:"introspective"}, {t:"我会想把它带回家养", d:"empathy"}] },
+            { q: "如果让你去安排一场10人旅行，你会把行程表精确到分钟？", opts: [{t:"必须的，强迫症晚期", d:"order"}, {t:"我会留出自由活动时间", d:"nature"}, {t:"我会把预算算得很清楚", d:"logic"}, {t:"随便吧，走到哪算哪", d:"chaos"}] },
+            { q: "你很容易被他人的痛苦感染，甚至看新闻都会流泪？", opts: [{t:"是的，共情能力太强", d:"empathy"}, {t:"我会想怎么解决这个问题", d:"logic"}, {t:"我会写文章呼吁", d:"language"}, {t:"我会去实地做志愿者", d:"extreme"}] },
+            { q: "你认为规矩就是用来打破的，按部就班太无聊了？", opts: [{t:"对，我讨厌被约束", d:"chaos"}, {t:"没有规矩不成方圆", d:"order"}, {t:"我只遵守合理的规矩", d:"logic"}, {t:"规矩能保护弱者", d:"empathy"}] },
+            { q: "你经常因为咬文嚼字，在群聊里被别人称为“杠精”？", opts: [{t:"我只是追求严谨", d:"logic"}, {t:"我擅长文字游戏", d:"language"}, {t:"我很少在群里说话", d:"introspective"}, {t:"我只对喜欢的话题杠", d:"extreme"}] },
+            { q: "朋友总评价你是个“非常靠谱、能把事交给你”的人？", opts: [{t:"是的，执行力超强", d:"order"}, {t:"我更像个创意提供者", d:"aesthetic"}, {t:"我更像个和事佬", d:"empathy"}, {t:"我更像个技术大牛", d:"spatial"}] },
+            { q: "你常常觉得，比起人类社会，你更喜欢大自然带来的治愈感？", opts: [{t:"大自然才是最包容的", d:"nature"}, {t:"我喜欢探索宇宙的奥秘", d:"spatial"}, {t:"我还是喜欢城市的繁华", d:"language"}, {t:"我喜欢研究动植物", d:"introspective"}] },
+            { q: "你极度讨厌半途而废，做事要么不做，要做就必须做到极致？", opts: [{t:"我有很强的执念", d:"extreme"}, {t:"我会权衡利弊再决定", d:"logic"}, {t:"我觉得完成比完美重要", d:"order"}, {t:"我很容易被新事物吸引", d:"chaos"}] },
+            { q: "看科幻电影时，你更关注宇宙飞船的构造而不是男女主的爱情？", opts: [{t:"对，我对机械结构着迷", d:"spatial"}, {t:"我会分析物理定律", d:"logic"}, {t:"我会关注特效美感", d:"aesthetic"}, {t:"我看电影就为了放松", d:"nature"}] },
+            { q: "让你当众演讲或者给客户推销产品，你完全不会怯场且极具感染力？", opts: [{t:"我是天生的演说家", d:"language"}, {t:"我会用同理心打动对方", d:"empathy"}, {t:"我会用数据说服对方", d:"logic"}, {t:"我会展现我的个人魅力", d:"aesthetic"}] },
+            { q: "你经常会幻想自己是一个虚拟世界的造物主，可以设计一切规则？", opts: [{t:"经常，我喜欢上帝视角", d:"spatial"}, {t:"我会设计极其精密的系统", d:"order"}, {t:"我会创造各种奇怪生物", d:"chaos"}, {t:"我会让世界充满爱", d:"empathy"}] },
+            { q: "你拥有非常强烈的个人色彩，讨厌盲从潮流，甚至有点“艺术家的怪脾气”？", opts: [{t:"我就是我，不一样的烟火", d:"aesthetic"}, {t:"我比较特立独行", d:"introspective"}, {t:"我喜欢挑战权威", d:"extreme"}, {t:"我喜欢顺应自然", d:"nature"}] },
+            { q: "如果有一项工作能让你远离人群，只专注钻研某样东西，你会非常开心？", opts: [{t:"太棒了，我社恐", d:"introspective"}, {t:"我更希望是研究大自然", d:"nature"}, {t:"我会专注写代码", d:"logic"}, {t:"我会沉迷于艺术创作", d:"aesthetic"}] }
+        ];
+        const dims = { logic: "逻辑解构", aesthetic: "审美感知", empathy: "人际共情", language: "语言表达", spatial: "空间构筑", order: "秩序执行", introspective: "内省探索", nature: "自然观察", chaos: "混沌脑洞", extreme: "极端偏执" };
+        const jobDB = {
+            logic: [{n:"算法工程师", d:"构建改变世界的代码逻辑"},{n:"数据分析师", d:"在海量数据中洞察商业机密"},{n:"金融精算师", d:"用数学计算出未来的风险"},{n:"网络安全专家", d:"数字世界的守门人"},{n:"刑侦检验员", d:"让证据开口说话"}],
+            aesthetic: [{n:"视觉设计师", d:"创作有视觉冲击力的作品"},{n:"插画师", d:"用画笔描绘奇妙世界"},{n:"时尚买手", d:"引领潮流的审美先锋"},{n:"影视导演", d:"用镜头讲述动人故事"},{n:"独立策展人", d:"艺术的传播者与组织者"}],
+            empathy: [{n:"心理咨询师", d:"抚慰人心的灵魂导师"},{n:"HRBP", d:"企业与员工之间的桥梁"},{n:"特教教师", d:"点亮星星的孩子的引路人"},{n:"大客户销售", d:"用真诚和专业打动客户"},{n:"康复理疗师", d:"用双手带来身心的治愈"}],
+            language: [{n:"广告文案", d:"一字千金，直击人心"},{n:"公关总监", d:"化解危机，塑造品牌形象"},{n:"涉外律师", d:"用语言捍卫公平正义"},{n:"同声传译", d:"跨越语言障碍的文化使者"},{n:"脱口秀编剧", d:"把生活写成段子的人"}],
+            spatial: [{n:"建筑设计师", d:"构建人类居住的物理空间"},{n:"游戏3D场景美术", d:"创造沉浸式的虚拟世界"},{n:"室内设计师", d:"让空间充满温度和美感"},{n:"无人机飞手", d:"以上帝视角俯瞰世界"},{n:"城市规划师", d:"描绘城市未来的宏伟蓝图"}],
+            order: [{n:"项目管理PM", d:"运筹帷幄，确保目标达成"},{n:"财务审计", d:"企业健康的守护者"},{n:"供应链统筹", d:"让万物高效流转"},{n:"行政总监", d:"大管家的终极形态"},{n:"活动运营策划", d:"把每一个细节做到极致"}],
+            introspective: [{n:"独立撰稿人", d:"与灵魂对话的文字工作者"},{n:"心理学家", d:"探索人类内心深处的奥秘"},{n:"图书馆馆长", d:"知识的守护者与传播者"},{n:"哲学研究员", d:"思考宇宙与人生的终极问题"},{n:"手帐设计师", d:"记录生活的美好仪式感"}],
+            nature: [{n:"宠物医生", d:"毛孩子生命的守护神"},{n:"生态研究员", d:"保护地球的生物多样性"},{n:"园艺设计师", d:"用植物装点生活"},{n:"地质勘探员", d:"探寻地球深处的秘密"},{n:"户外营地导师", d:"带领人们回归自然怀抱"}],
+            chaos: [{n:"元宇宙架构师", d:"在虚拟世界创造一切可能"},{n:"NFT数字艺术家", d:"颠覆传统艺术认知的先锋"}],
+            extreme: [{n:"极限运动摄影师", d:"在生死边缘捕捉极致的美"},{n:"前卫艺术家", d:"不疯魔不成活"}]
+        };
+        let currentQ = 0;
+        let scores = { logic:0, aesthetic:0, empathy:0, language:0, spatial:0, order:0, introspective:0, nature:0, chaos:0, extreme:0 };
+        let hiddenFlags = { q15: false, q19: false, q23: false };
+        function startQuiz() { document.getElementById('home-page').style.display = 'none'; document.getElementById('quiz-page').style.display = 'flex'; renderQuestion(); }
+        function renderQuestion() {
+            if (currentQ >= questions.length) { showResult(); return; }
+            const qData = questions[currentQ];
+            document.getElementById('question-text').innerText = qData.q;
+            document.getElementById('progress').style.width = ((currentQ) / questions.length) * 100 + '%';
+            const optsContainer = document.getElementById('options-container');
+            optsContainer.innerHTML = '';
+            qData.opts.forEach(opt => {
+                const btn = document.createElement('div');
+                btn.className = 'option'; btn.innerText = opt.t; btn.onclick = () => selectOption(opt.d);
+                optsContainer.appendChild(btn);
+            });
+        }
+        function selectOption(dim) {
+            if (currentQ === 14 && dim === 'chaos') hiddenFlags.q15 = true;
+            if (currentQ === 18 && dim === 'extreme') hiddenFlags.q19 = true;
+            if (currentQ === 22 && dim === 'extreme') hiddenFlags.q23 = true;
+            scores[dim] = (scores[dim] || 0) + 1;
+            currentQ++;
+            const quizPage = document.getElementById('quiz-page');
+            quizPage.style.opacity = '0';
+            setTimeout(() => { renderQuestion(); quizPage.style.opacity = '1'; }, 150);
+        }
+        function showResult() {
+            document.getElementById('quiz-page').style.display = 'none';
+            document.getElementById('result-page').style.display = 'flex';
+            let isEasterEgg = false; let typeName = ""; let typeDesc = "";
+            if (hiddenFlags.q15 && hiddenFlags.q19 && hiddenFlags.q23) { isEasterEgg = true; typeName = "🤡 赛博疯子"; typeDesc = "常规职场容不下你，你的归宿是元宇宙！"; }
+            else if (scores.introspective >= 3 && scores.nature >= 3) { isEasterEgg = true; typeName = "🌿 隐世高人"; typeDesc = "世俗的KPI对你来说只是浮云，你的灵魂在大自然。"; }
+            else {
+                const sortedDims = Object.keys(scores).filter(k => !['chaos', 'extreme'].includes(k)).sort((a,b) => scores[b] - scores[a]);
+                const top1 = sortedDims[0];
+                typeName = top1 === 'aesthetic' ? "艺术创作型" : top1 === 'logic' ? "理性推演型" : top1 === 'empathy' ? "灵魂治愈型" : top1 === 'language' ? "传播表达型" : top1 === 'spatial' ? "空间构筑型" : top1 === 'order' ? "秩序掌控型" : top1 === 'introspective' ? "内省哲思型" : "自然亲和型";
+                typeDesc = "你擅长" + dims[top1] + "，这是你独一无二的天赋。";
+            }
+            document.getElementById('res-type').innerText = typeName;
+            document.getElementById('res-subtitle').innerText = typeDesc;
+            let totalScore = 0; let radarData = [];
+            const coreDims = ['logic', 'spatial', 'aesthetic', 'language', 'empathy', 'introspective', 'nature', 'order'];
+            coreDims.forEach(k => { totalScore += scores[k]; radarData.push({ label: dims[k], val: scores[k] }); });
+            let displayTotal = Math.min(Math.round((totalScore / 12) * 100), 100); 
+            if(displayTotal < 30) displayTotal = 30;
+            document.getElementById('res-total').innerText = displayTotal;
+            document.getElementById('res-strength').innerText = Math.min(displayTotal + 5, 99) + "%";
+            drawRadar(radarData);
+            renderJobs(isEasterEgg);
+        }
+        function drawRadar(data) {
+            const canvas = document.getElementById('radarChart'); const ctx = canvas.getContext('2d');
+            const w = canvas.width; const h = canvas.height; const cx = w / 2; const cy = h / 2; const r = 90; const angle = (Math.PI * 2) / data.length;
+            ctx.clearRect(0, 0, w, h); ctx.translate(cx, cy);
+            ctx.strokeStyle = '#2a233b'; ctx.lineWidth = 1;
+            for (let level = 1; level <= 4; level++) {
+                ctx.beginPath();
+                for (let i = 0; i < data.length; i++) {
+                    const x = Math.cos(angle * i - Math.PI/2) * (r * level / 4); const y = Math.sin(angle * i - Math.PI/2) * (r * level / 4);
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.closePath(); ctx.stroke();
+            }
+            ctx.fillStyle = '#8a7e9f'; ctx.font = '10px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            for (let i = 0; i < data.length; i++) {
+                const x = Math.cos(angle * i - Math.PI/2) * r; const y = Math.sin(angle * i - Math.PI/2) * r;
+                ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(x, y); ctx.stroke();
+                const textX = Math.cos(angle * i - Math.PI/2) * (r + 15); const textY = Math.sin(angle * i - Math.PI/2) * (r + 15);
+                ctx.fillText(data[i].label, textX, textY);
+            }
+            ctx.beginPath();
+            for (let i = 0; i < data.length; i++) {
+                let val = data[i].val > 5 ? 5 : data[i].val; 
+                const x = Math.cos(angle * i - Math.PI/2) * (r * val / 5); const y = Math.sin(angle * i - Math.PI/2) * (r * val / 5);
+                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.closePath(); ctx.fillStyle = 'rgba(157, 101, 255, 0.4)'; ctx.fill(); ctx.strokeStyle = '#9d65ff'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+        }
+        function renderJobs(isEasterEgg) {
+            const container = document.getElementById('jobs-container'); container.innerHTML = '';
+            const sortedDims = Object.keys(scores).filter(k => !['chaos', 'extreme'].includes(k)).sort((a,b) => scores[b] - scores[a]);
+            let selectedJobs = [];
+            if (isEasterEgg) { selectedJobs = [...jobDB.chaos, ...jobDB.extreme]; } 
+            else {
+                const top1 = sortedDims[0]; const top2 = sortedDims[1];
+                selectedJobs = [...jobDB[top1]];
+                if (selectedJobs.length < 4) { selectedJobs = selectedJobs.concat(jobDB[top2]); }
+                selectedJobs = selectedJobs.slice(0, 4);
+            }
+            let matchScores = [97, 93, 89, 85];
+            selectedJobs.forEach((job, index) => {
+                const div = document.createElement('div'); div.className = 'job-item';
+                div.innerHTML = `<div class="job-name-row"><div class="job-name">${job.n}</div><div class="job-match">${matchScores[index]}%</div></div><div class="job-desc">${job.d}</div><div class="job-advice">成长建议：发挥你的天赋，持续深耕该领域的专业技能。</div>`;
+                container.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>
